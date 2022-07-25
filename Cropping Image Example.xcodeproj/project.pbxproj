@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F1B1A6A288C108E00138D01 /* CroppedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1B1A69288C108E00138D01 /* CroppedImage.swift */; };
 		9F5996C228832FA40072087D /* Cropping_Image_ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F5996C128832FA40072087D /* Cropping_Image_ExampleApp.swift */; };
 		9F5996C428832FA40072087D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F5996C328832FA40072087D /* ContentView.swift */; };
 		9F5996C628832FA50072087D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F5996C528832FA50072087D /* Assets.xcassets */; };
@@ -14,6 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9F1B1A69288C108E00138D01 /* CroppedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CroppedImage.swift; sourceTree = "<group>"; };
 		9F5996BE28832FA40072087D /* Cropping Image Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Cropping Image Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F5996C128832FA40072087D /* Cropping_Image_ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cropping_Image_ExampleApp.swift; sourceTree = "<group>"; };
 		9F5996C328832FA40072087D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 			children = (
 				9F5996C128832FA40072087D /* Cropping_Image_ExampleApp.swift */,
 				9F5996C328832FA40072087D /* ContentView.swift */,
+				9F1B1A69288C108E00138D01 /* CroppedImage.swift */,
 				9F5996C528832FA50072087D /* Assets.xcassets */,
 				9F5996C728832FA50072087D /* Preview Content */,
 			);
@@ -137,6 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9F1B1A6A288C108E00138D01 /* CroppedImage.swift in Sources */,
 				9F5996C428832FA40072087D /* ContentView.swift in Sources */,
 				9F5996C228832FA40072087D /* Cropping_Image_ExampleApp.swift in Sources */,
 			);
