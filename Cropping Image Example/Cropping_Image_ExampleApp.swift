@@ -11,7 +11,7 @@ import SwiftUI
 struct Cropping_Image_ExampleApp: App {
     var body: some Scene {
         WindowGroup {
-            CroppingView()
+            ContentView()
         }
     }
 }
