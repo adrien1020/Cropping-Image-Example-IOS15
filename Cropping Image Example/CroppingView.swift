@@ -17,7 +17,6 @@ struct CroppingView: View {
     @State private var cropSize : CGSize = CGSize(width: 0, height: 0)
     @State private var imageSize : CGSize = CGSize(width: 0, height: 0)
     
-    
     //MARK: - Logic variables
     
     @State private var isShowingCroppedImage: Bool = false
@@ -70,17 +69,13 @@ struct CroppingView: View {
     @State private var lastBottomRightOffset = CGSize(width: 0, height: 0)
     @State private var finalBottomRightOffset: CGSize = CGSize(width: 0, height: 0)
     
+    @State private var topLeftSideIsActive = false
+    @State private var topRightSideIsActive = false
+    @State private var bottomRightSideIsActive = false
+    @State private var bottomLeftSideIsActive = false
     
-    @State private var xRectOffset : CGFloat = 0.0
-    @State private var yRectOffset : CGFloat = 0.0
-    
-    @State private var lastXRectOffset : CGFloat = 0.0
-    @State private var lastYRectOffset : CGFloat = 0.0
-
-                    @State var rectMove = false
     
     var body: some View{
-        
         ZStack{
             Color.black
             if isShowingCroppedImage{
@@ -88,19 +83,17 @@ struct CroppingView: View {
                     .resizable()
                     .scaledToFit()
                     .matchedGeometryEffect(id: "crop", in: namespace)
-                
                     .overlay(GeometryReader{geometry -> AnyView in
                         DispatchQueue.main.async{
-                            
                             //Get image size
                             imageSize = geometry.size
-                            
                             //Get crop zone size
                             cropSize = geometry.size
                         }
                         return AnyView(EmptyView())
                     })
-                    .frame(width: isEditing ? UIScreen.main.bounds.width - 20 : UIScreen.main.bounds.width)
+                    .frame(width: isEditing ? UIScreen.main.bounds.width - 100 : UIScreen.main.bounds.width)
+                
             } else {
                 Image(uiImage: (originalImage ??  UIImage(named: "Image"))!)
                     .resizable()
@@ -116,30 +109,29 @@ struct CroppingView: View {
                         }
                         return AnyView(EmptyView())
                     })
-                    .frame(width: isEditing ? UIScreen.main.bounds.width - 20 : UIScreen.main.bounds.width)
+                    .frame(width: isEditing ? UIScreen.main.bounds.width - 100 : UIScreen.main.bounds.width)
             }
-            
-            
             if isEditing{
                 //MARK: - Mask rectangles
+                
                 //Top mask rectangle
                 Group{
                     Rectangle()
-                        .foregroundColor(isPerformingAnimation ? .none : .black.opacity(0.8))
+                        .foregroundColor(isPerformingAnimation ? .black : .black.opacity(0.8))
                         .frame(width: imageSize.width,
                                height: topLeftOffset.height * 2)
                         .offset(y: -cropSize.height/2 + topLeftOffset.height)
                     
                     //Bottom mask rectangle
                     Rectangle()
-                        .foregroundColor(isPerformingAnimation ? .none : .black.opacity(0.8))
+                        .foregroundColor(isPerformingAnimation ? .black : .black.opacity(0.8))
                         .frame(width: imageSize.width,
                                height: -bottomLeftOffset.height * 2)
                         .offset(y: cropSize.height/2 + bottomLeftOffset.height)
                     
                     //Right mask rectangle
                     Rectangle()
-                        .foregroundColor(isPerformingAnimation ? .none : .black.opacity(0.8))
+                        .foregroundColor(isPerformingAnimation ? .black : .black.opacity(0.8))
                         .frame(width: -topRightOffset.width * 2,
                                height: cropSize.height - ((topLeftOffset.height*2) - (bottomLeftOffset.height*2)))
                         .offset(x:(cropSize.width)/2 + topRightOffset.width,
@@ -147,7 +139,7 @@ struct CroppingView: View {
                     
                     //Left mask rectangle
                     Rectangle()
-                        .foregroundColor(isPerformingAnimation ? .none : .black.opacity(0.8))
+                        .foregroundColor(isPerformingAnimation ? .black : .black.opacity(0.8))
                         .frame(width: topLeftOffset.width * 2,
                                height: cropSize.height - ((topLeftOffset.height*2) - (bottomLeftOffset.height*2)))
                         .offset(x: -(cropSize.width)/2 + topLeftOffset.width,
@@ -155,6 +147,7 @@ struct CroppingView: View {
                 }
                 
                 //MARK: - Crop rectangle
+                
                 Group{
                     Rectangle()
                         .stroke(lineWidth: 0.8)
@@ -174,48 +167,12 @@ struct CroppingView: View {
                                height: getCroppRectFrame(cropSize: cropSize.height).height)
                         .foregroundColor(.white)
                         .offset(x: getCroppRectOffset().width, y: getCroppRectOffset().height)
-                    Rectangle()
-                        .frame(width: getCroppRectFrame(cropSize: cropSize.width).width,
-                               height: getCroppRectFrame(cropSize: cropSize.height).height)
-                        .foregroundColor(.red).opacity(0.3)
-                        .offset(x: getCroppRectOffset().width, y: getCroppRectOffset().height)
-                        .gesture(DragGesture().onChanged({gesture in
-                            
-                            rectMove = true
-                            
-                            xRectOffset = gesture.translation.width + lastXRectOffset
-                            yRectOffset = gesture.translation.height + lastYRectOffset
-                            
-                            print(xRectOffset)
-                            print(yRectOffset)
-                            
-                            
-                
-                            bottomRightOffset.width = xRectOffset
-                            bottomRightOffset.height = yRectOffset
-                            
-                            bottomLeftOffset.width = xRectOffset
-                            bottomLeftOffset.height = yRectOffset
-                            
-                            topLeftOffset.width = xRectOffset
-                            topLeftOffset.height = yRectOffset
-                            
-                            topRightOffset.width = xRectOffset
-                            topRightOffset.height = yRectOffset
-                            
-                           
-                          
-                            
-                            
-                            
-                        }).onEnded({ _ in
-                            
-                        }))
                 }
                 
                 Group{
                     
                     //MARK: - Top-left arrow
+                    
                     Image("arrow.top.left")
                         .resizable()
                         .font(.system(size: 12))
@@ -224,7 +181,10 @@ struct CroppingView: View {
                         .offset(x: (topLeftOffset.width) - (topLeftMagnification.width * cropSize.width)/2,
                                 y: (topLeftOffset.height) - (topLeftMagnification.height * cropSize.height)/2)
                         .gesture(DragGesture().onChanged({gesture in
-                            
+                            bottomRightSideIsActive = false
+                            topRightSideIsActive = false
+                            topLeftSideIsActive = true
+                            bottomLeftSideIsActive = false
                             croppingVM.side = .topLeft
                             
                             //Get offset drag gesture
@@ -232,8 +192,7 @@ struct CroppingView: View {
                             yTopLeftOffset = gesture.translation.height + lastTopLeftOffset.height
                             
                             //Get the ratio of crop magnification
-                            topLeftMagnification = croppingVM.getMagnification(xOffset: -xTopLeftOffset,
-                                                                               yOffset: -yTopLeftOffset, cropSize: cropSize)
+                            topLeftMagnification = croppingVM.getMagnification(xOffset: -xTopLeftOffset, yOffset: -yTopLeftOffset, cropSize: cropSize)
                             
                             //Add Limit when reducing
                             topLeftMagnification = croppingVM.addReducingLimit(magnification: topLeftMagnification,
@@ -259,6 +218,10 @@ struct CroppingView: View {
                             topRightOffset.height = topLeftOffset.height
                             
                         }).onEnded({ _ in
+                            bottomRightSideIsActive = false
+                            topRightSideIsActive = false
+                            topLeftSideIsActive = false
+                            bottomLeftSideIsActive = false
                             
                             //Store last offset and last limit reducing gesture
                             lastTopLeftOffset = croppingVM.storeLastGesture(xOffset: xTopLeftOffset,
@@ -272,10 +235,10 @@ struct CroppingView: View {
                             //Store last offset if offset is in limit edges
                             lastTopLeftOffset = croppingVM.storeLastLimitEdges(xOffset: xTopLeftOffset, yOffset: yTopLeftOffset, lastOffset: lastTopLeftOffset, imageSize: imageSize, cropSize: cropSize)
                             
+                            
                             //Store last magnification and finial offset, it's used for crop calculations
                             lastTopLeftMagnification = topLeftMagnification
                             finalTopLeftOffset = topLeftOffset
-                            
                             
                             //Store magnification and offset that are common in x
                             lastBottomLeftMagnification.width = lastTopLeftMagnification.width
@@ -287,31 +250,10 @@ struct CroppingView: View {
                             lastTopRightOffset.height = lastTopLeftOffset.height
                             finalTopRightOffset.height = topLeftOffset.height
                             
-                            croppedImage = croppingVM.cropImage(
-                                originalImage: originalImage!, lastOffset: lastTopLeftOffset,
-                                lastMagnification: lastTopLeftMagnification,
-                                xLastOppositeMagnification: lastTopRightMagnification.width,
-                                yLastOppositeMagnification: lastBottomLeftMagnification.height, imageSize: imageSize, cropSize: cropSize)!
-                            
-                            
-                            //Animation forground color black
-                            withAnimation(.easeIn(duration: 0.5)){
-                                isPerformingAnimation = true
-                            }
-                            
-                            DispatchQueue.main.asyncAfter(deadline: .now()+0.6, execute: {
-                                
-                                withAnimation(.spring(response: 0.3).speed(0.8)){
-                                    isEditing.toggle()
-                                    originalImage = croppedImage!
-                                    isShowingCroppedImage.toggle()
-                                    resetVariables()
-                                    isPerformingAnimation = false
-                                }
-                            })
+                            cropImage()
+            
                         }))
-                    
-                    
+                        .disabled(topRightSideIsActive || bottomLeftSideIsActive || bottomRightSideIsActive || isPerformingAnimation)
                     
                     //MARK: - Top-right arrow
                     
@@ -323,7 +265,10 @@ struct CroppingView: View {
                         .offset(x: (topRightOffset.width) + (topRightMagnification.width * cropSize.width) / 2,
                                 y: (topRightOffset.height) - (topRightMagnification.height * cropSize.height) / 2)
                         .gesture(DragGesture().onChanged({gesture in
-                            
+                            bottomRightSideIsActive = false
+                            topRightSideIsActive = true
+                            topLeftSideIsActive = false
+                            bottomLeftSideIsActive = false
                             croppingVM.side = .topRight
                             
                             //Get offset drag gesture
@@ -333,6 +278,7 @@ struct CroppingView: View {
                             //Get the ratio of crop magnification
                             topRightMagnification = croppingVM.getMagnification(xOffset: xTopRightOffset, yOffset: -yTopRightOffset, cropSize: cropSize)
                             
+                            print(topRightMagnification)
                             //Add Limit when reducing
                             topRightMagnification = croppingVM.addReducingLimit(magnification: topRightMagnification, xLastOpposedMagnification: lastTopLeftMagnification.width, yLastOpposedMagnification: lastBottomRightMagnification.height)
                             
@@ -351,7 +297,10 @@ struct CroppingView: View {
                             topLeftOffset.height = topRightOffset.height
                             
                         }).onEnded({_ in
-                            
+                            bottomRightSideIsActive = false
+                            topRightSideIsActive = false
+                            topLeftSideIsActive = false
+                            bottomLeftSideIsActive = false
                             //Store last offset and last limit reducing gesture
                             lastTopRightOffset = croppingVM.storeLastGesture(xOffset: xTopRightOffset,
                                                                              yOffset: yTopRightOffset,
@@ -379,8 +328,12 @@ struct CroppingView: View {
                             lastTopLeftMagnification.height = lastTopRightMagnification.height
                             lastTopLeftOffset.height = lastTopRightOffset.height
                             finalTopLeftOffset.height = topRightOffset.height
+                            
+                            cropImage()
+                            
                         }))
                     
+                        .disabled(topLeftSideIsActive || bottomLeftSideIsActive || bottomRightSideIsActive || isPerformingAnimation)
                     //MARK: - Bottom-left arrow
                     
                     Image("arrow.bottom.left")
@@ -391,7 +344,10 @@ struct CroppingView: View {
                         .offset(x: (bottomLeftOffset.width) - (bottomLeftMagnification.width * cropSize.width) / 2 ,
                                 y: (bottomLeftOffset.height) + (bottomLeftMagnification.height * cropSize.height) / 2)
                         .gesture(DragGesture().onChanged({gesture in
-                            
+                            bottomRightSideIsActive = false
+                            topRightSideIsActive = false
+                            topLeftSideIsActive = false
+                            bottomLeftSideIsActive = true
                             croppingVM.side = .bottomLeft
                             
                             //Get offset drag gesture
@@ -426,9 +382,11 @@ struct CroppingView: View {
                             bottomRightOffset.height = bottomLeftOffset.height
                             
                             
-                            
                         }).onEnded({ _ in
-                            
+                            bottomRightSideIsActive = false
+                            topRightSideIsActive = false
+                            topLeftSideIsActive = false
+                            bottomLeftSideIsActive = false
                             //Store last offset and last limit reducing gesture
                             lastBottomLeftOffset = croppingVM.storeLastGesture(xOffset: xBottomLeftOffset,
                                                                                yOffset: yBottomLeftOffset,
@@ -456,7 +414,11 @@ struct CroppingView: View {
                             lastBottomRightMagnification.height = lastBottomLeftMagnification.height
                             lastBottomRightOffset.height = lastBottomLeftOffset.height
                             finalBottomRightOffset.height = bottomLeftOffset.height
+                            
+                            cropImage()
+                            
                         }))
+                        .disabled(topLeftSideIsActive || topRightSideIsActive || bottomRightSideIsActive || isPerformingAnimation)
                     
                     //MARK: - Bottom-right arrow
                     
@@ -468,6 +430,10 @@ struct CroppingView: View {
                         .offset(x: (bottomRightOffset.width) + (bottomRightMagnification.width * cropSize.width) / 2,
                                 y: (bottomRightOffset.height) + (bottomRightMagnification.height * cropSize.height) / 2)
                         .gesture(DragGesture().onChanged({ gesture in
+                            bottomRightSideIsActive = true
+                            topRightSideIsActive = false
+                            topLeftSideIsActive = false
+                            bottomLeftSideIsActive = false
                             
                             croppingVM.side = .bottomRight
                             
@@ -503,7 +469,10 @@ struct CroppingView: View {
                             bottomLeftOffset.height = bottomRightOffset.height
                             
                         }).onEnded({ _ in
-                            
+                            bottomRightSideIsActive = false
+                            topRightSideIsActive = false
+                            topLeftSideIsActive = false
+                            bottomLeftSideIsActive = false
                             //Store last offset and last limit reducing gesture
                             lastBottomRightOffset = croppingVM.storeLastGesture(xOffset: xBottomRightOffset,
                                                                                 yOffset: yBottomRightOffset,
@@ -531,17 +500,24 @@ struct CroppingView: View {
                             lastBottomLeftMagnification.height = lastBottomRightMagnification.height
                             lastBottomLeftOffset.height = lastBottomRightOffset.height
                             finalBottomLeftOffset.height = bottomRightOffset.height
+                            
+                            cropImage()
+                            
                         }))
+                        .disabled(topLeftSideIsActive || topRightSideIsActive || bottomLeftSideIsActive || isPerformingAnimation)
                 }
             }
+            
         }
+        .onChange(of: isEditing, perform: { _ in
+            resetVariables()
+        })
     }
     
     func getCroppRectOffset()->CGSize{
         
         let xOffset = croppingVM.side.sides.1 ? topLeftOffset.width + finalTopRightOffset.width : topRightOffset.width + finalTopLeftOffset.width
         let yOffset = croppingVM.side.sides.0 ? topLeftOffset.height + finalBottomLeftOffset.height: bottomLeftOffset.height + finalTopLeftOffset.height
-        
         return CGSize(width: xOffset, height: yOffset)
     }
     
@@ -555,12 +531,37 @@ struct CroppingView: View {
         return CGSize(width: widthFrame, height: heightFrame)
     }
     
+    func cropImage(){
+        croppedImage = croppingVM.cropImage(
+            originalImage: originalImage!, lastOffset: lastTopLeftOffset,
+            lastMagnification: lastTopLeftMagnification,
+            xLastOppositeMagnification: lastTopRightMagnification.width,
+            yLastOppositeMagnification: lastBottomLeftMagnification.height, imageSize: imageSize, cropSize: cropSize)!
+        
+        
+        //Animation forground color black
+        withAnimation(.easeIn(duration: 0.5)){
+            isPerformingAnimation = true
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.6, execute: {
+            
+            withAnimation(.spring(response: 0.3).speed(0.8)){
+                isEditing.toggle()
+                originalImage = croppedImage!
+                isShowingCroppedImage.toggle()
+                resetVariables()
+                isPerformingAnimation = false
+            }
+        })
+        
+    }
+    
     func resetVariables(){
         topLeftMagnification = CGSize(width: 1.0, height: 1.0)
         topRightMagnification = CGSize(width: 1.0, height: 1.0)
         bottomLeftMagnification = CGSize(width: 1.0, height: 1.0)
         bottomRightMagnification = CGSize(width: 1.0, height: 1.0)
-        
         
         lastTopLeftMagnification = CGSize(width: 1.0, height: 1.0)
         lastTopRightMagnification = CGSize(width: 1.0, height: 1.0)
@@ -581,11 +582,8 @@ struct CroppingView: View {
         topRightOffset = CGSize(width: 0.0, height: 0.0)
         bottomLeftOffset = CGSize(width: 0.0, height: 0.0)
         bottomRightOffset = CGSize(width: 0.0, height: 0.0)
-        
-        
     }
 }
-
 
 struct CroppingView_Previews: PreviewProvider {
     static var previews: some View {

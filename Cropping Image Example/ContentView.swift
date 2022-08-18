@@ -13,29 +13,30 @@ struct ContentView: View{
     @State private var isOpenningImagePicker = false
     @State var originalImage: UIImage?
     @State private var inputImage: UIImage?
+    @State private var savedImage: UIImage?
     var body: some View{
         ZStack{
             Color.black
             VStack{
+                HStack{
+                    if originalImage != savedImage && !isEditing{
+                        Button(action: {
+                            originalImage = savedImage
+                        }, label: {
+                            Text("Réinit")
+                                .foregroundColor(.yellow)
+                        })
+                    }
+                }
+                .frame(width: UIScreen.main.bounds.width, height: 20, alignment: .center)
                 CroppingView(originalImage: $originalImage, isEditing: $isEditing)
                 HStack{
-                    if isEditing{
-                        Spacer()
-                        Button(action: {
-                            withAnimation{
-                                self.isEditing = false
-                            }
-                        }, label: {
-                            Text("Annuler")
-                                .foregroundColor(Color.white)
-                        })
-                        Spacer()
-                    }
+                   
                     Spacer()
                     Button(action: {
                         isOpenningImagePicker.toggle()
                         withAnimation{
-                            self.isEditing = false
+                            isEditing = false
                         }
                     }, label: {
                         Image(systemName: "photo")
@@ -47,12 +48,12 @@ struct ContentView: View{
                     Spacer()
                     Button(action: {
                         withAnimation{
-                            self.isEditing.toggle()
+                            isEditing.toggle()
                         }
                     }, label: {
                         Image(systemName: "crop")
                             .font(.system(size: 24))
-                            .foregroundColor(.white)
+                            .foregroundColor(isEditing ? .yellow : .white)
                     })
                     .buttonStyle(.bordered)
                     .tint(.gray)
@@ -66,14 +67,13 @@ struct ContentView: View{
         }
         .onAppear(){
             originalImage = UIImage(named: "Image")
+            savedImage = originalImage
         }
-        
         .onChange(of: inputImage, perform: { _ in
             loadImage()
         })
-        
         .sheet(isPresented: $isOpenningImagePicker, content: {
-            ImagePickerView(image: $originalImage)
+            ImagePickerView(image: $inputImage)
         })
         .background(Color.black)
     }
@@ -81,7 +81,7 @@ struct ContentView: View{
     func loadImage(){
         guard let inputImage = inputImage else {return}
         originalImage = inputImage
-        
+        savedImage = inputImage
     }
 }
 

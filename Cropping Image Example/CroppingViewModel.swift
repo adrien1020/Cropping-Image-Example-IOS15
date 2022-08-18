@@ -13,8 +13,6 @@ extension CroppingView{
     @MainActor
     class CroppingViewModel: ObservableObject {
 
-        @Published var saveOriginalImage = UIImage(named: "Image")
-        
         var side: Side = .topLeft
         
         func getMagnification(xOffset: CGFloat, yOffset: CGFloat, cropSize: CGSize)->CGSize{
